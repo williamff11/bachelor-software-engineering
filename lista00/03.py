@@ -29,10 +29,10 @@
 # print(n_primos)
 
 numero = int(input("\nDigite um número: "))
-lista = []
+lista = [2]
 
 for i in range(numero + 1):
-    if i % 2 == 1 and i != 2:
+    if i % 2 == 1 and i != 1:
         lista.append(i)
 
 print(lista)

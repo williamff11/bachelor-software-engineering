@@ -18,7 +18,7 @@ random_darkBlue = (12, 42, 147)
 random_white = (59, 55, 25)
 random_black = (10, 100, 255)
 random_pink = (22, 90, 212)
-cores = [lightBlue, blue, darkBlue, white, black, pink, random_lightBlue,
+cores = [lightBlue, blue, darkBlue, black, pink, random_lightBlue,
          random_blue,
          random_darkBlue,
          random_white,
@@ -34,11 +34,12 @@ conta_clocks = 0
 
 pontos = 0
 
-conta_segundos = 0
+conta_segundos = 10
 
 
 def mostra_tempo(tempo, pontos):
-    font = pygame.font.Font(None, 24)
+    font = pygame.font.SysFont(
+        'yugothicregularyugothicuisemilight', 24)
     text = font.render("Tempo " + str(tempo) +
                        "s | Pontuação: " + str(pontos), False, white)
     textpos = text.get_rect(centerx=tela.get_width()/2)
@@ -54,9 +55,12 @@ while not terminou:
             terminou = True
     conta_clocks += 1
     if conta_clocks == 50:
-        conta_segundos += 1
-        conta_clocks = 0
-        tela.fill(cores[random.randint(0, 10)])
+        if conta_segundos > 0:
+            conta_segundos -= 1
+            conta_clocks = 0
+            tela.fill(cores[random.randint(0, 10)])
+        else:
+            terminou = True
 
     mostra_tempo(conta_segundos, pontos)
     pygame.draw.rect(tela, black, (10, 10, 200, 100), 3)

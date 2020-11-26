@@ -10,19 +10,20 @@ altura_tela = 640
 tela = pygame.display.set_mode((largura_tela, altura_tela))
 
 # cores
-branco = (255, 255, 255)
+purple = (150, 70, 255)
+azul = (18, 10, 143)
 preto = (0, 0, 0)
 
 pygame.display.set_caption('Circle')
 
 
 def draw_circle():
-    pygame.draw.circle(tela, branco, (largura_tela/2, altura_tela/2), 50)
+    pygame.draw.circle(tela, azul, (largura_tela/2, altura_tela/2), 50)
     pygame.display.update()
 
 
 terminou = False
-tela.fill(preto)
+tela.fill(purple)
 draw_circle()
 while not terminou:
     for event in pygame.event.get():

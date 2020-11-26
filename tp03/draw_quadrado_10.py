@@ -3,6 +3,7 @@ import pygame
 pygame.init()
 largura_tela, altura_tela = 800, 640
 tela = pygame.display.set_mode((largura_tela, altura_tela))
+clock = pygame.time.Clock()
 
 branco = (255, 255, 255)
 preto = (0, 0, 0)

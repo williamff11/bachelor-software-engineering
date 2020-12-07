@@ -1,33 +1,25 @@
-import platform
-import re
-import sys
 import cpuinfo
-from urllib.request import urlopen
-
+import platform
 import psutil
 import pygame
-from pygame.locals import *
 
 
 # INICIALIZAÇÃO
 pygame.init()
 CLOCK = pygame.time.Clock()
-HZ = 60
+FPS = 60
 
-# CONFIGURAÇÃO JANELA PRINCIPAL
-LARGURA_TELA = 600
+LARGURA_TELA = 800
 ALTURA_TELA = 600
 TELA = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
 pygame.display.set_caption("Painel De Recursos")
 
-# CORES
 VERMELHO = (242, 27, 63)
 WINE = (97, 3, 69)
 PASTEL = (241, 233, 219)
 AZUL_PISCINA = (93, 183, 222)
 SALMAO = (239, 111, 108)
 
-# FONTES
 pygame.font.init()
 TITLE_FONT = pygame.font.SysFont("roboto-mono", 60)
 INFO_FONT = pygame.font.SysFont("roboto", 18)
@@ -52,8 +44,8 @@ def show_cpu():
 
     titulo = TITLE_FONT.render("Processador", True, WINE)
     tela_02.blit(titulo, (40, 20))
-    # Informações
-    marca = "{}".format(info_cpu['brand_raw'])
+
+    marca = "Marca: {}".format(info_cpu['brand_raw'])
     more_infos = "Clock: {} GHz | bits: {} bits | Arch: {}".format(
         psutil.cpu_freq().current/1000, info_cpu['bits'], info_cpu['arch'])
     system_operation = "SO: {} ({})".format(
@@ -93,18 +85,14 @@ def show_use_memory():
     memoria = psutil.virtual_memory()
     tela_01 = pygame.Surface(TAM_TELA)
     tela_01.fill(PASTEL)
-    # Posições em pixels
     pos_altura_barra = 110
     pos_final_barra = int(LARGURA_TELA - LARGURA_TELA * 0.15)
-    # Desenha barra total (em azul)
     pygame.draw.rect(tela_01, SALMAO, (70, pos_altura_barra,
                                        pos_final_barra, THICKNESS))
-    # Barra de uso (em vermelho)
     pos_final_barra_uso = pos_final_barra * (memoria.percent / 100)
     pygame.draw.rect(tela_01, VERMELHO, (70, pos_altura_barra,
                                          pos_final_barra_uso, THICKNESS))
 
-    # Início Textos
     perc_texto = "{}%".format(memoria.percent)
 
     titulo = INFO_BOLD_FONT.render(
@@ -113,7 +101,6 @@ def show_use_memory():
     tela_01.blit(titulo, (40, 20))
     tela_01.blit(percentagem_uso, (15, pos_altura_barra))
 
-    # Memoria Física total
     free_memory = "Memória em uso: {:.2f} GB | Memória livre: {:.2f} GB".format(memoria.used / (1024.0 ** 3),
                                                                                 memoria.free / (1024.0 ** 3))
     free_memory_render = INFO_FONT.render(free_memory, True, WINE)
@@ -122,30 +109,23 @@ def show_use_memory():
     TELA.blit(tela_01, (0, 0))
 
 
-# Disco
 def show_use_disk():
     disk = verifica_discos()
     tela_03 = pygame.Surface(TAM_TELA)
     tela_03.fill(PASTEL)
-    # Posições em pixels
     pos_final_barra = int(LARGURA_TELA - LARGURA_TELA * 0.15)
-    # Desenha barra total (em azul)
     pygame.draw.rect(tela_03, SALMAO, (70, 110,
                                        pos_final_barra, THICKNESS))
-    # Barra de uso (em vermelho)
     pos_final_barra_uso = pos_final_barra * (disk[5] / 100)
     pygame.draw.rect(tela_03, VERMELHO, (70, 110,
                                          pos_final_barra_uso, THICKNESS))
 
-    # Início Textos
     perc_texto = "{}%".format(disk[5])
 
     titulo = TITLE_FONT.render("Espaço Total em Disco", True, WINE)
     percentagem_uso = PERCENT_FONT.render(perc_texto, True, WINE)
     tela_03.blit(titulo, (40, 20))
     tela_03.blit(percentagem_uso, (15, 110))
-
-    # Espaço total
 
     qnt = "Quantidade de discos: {:g}".format(round(disk[0]))
     qnt_render = INFO_FONT.render(qnt, True, WINE)
@@ -156,24 +136,19 @@ def show_use_disk():
     tela_03.blit(
         disks_render, (pos_final_barra - 160, 150))
 
-    # Espaço livre/ocupado no hd
     free = "Espaço livre: {:.2f} GB".format(disk[4] / (1024.0 ** 3))
-    fill = "Espaço usado: {:.2f} GB".format(disk[3] / (1024.0 ** 3))
+    used = "Espaço usado: {:.2f} GB".format(disk[3] / (1024.0 ** 3))
     free_render = INFO_FONT.render(free, True, WINE)
-    fill_render = INFO_FONT.render(fill, True, WINE)
+    used_render = INFO_FONT.render(used, True, WINE)
     tela_03.blit(free_render, (70, 130))
-    tela_03.blit(fill_render, (70, 150))
+    tela_03.blit(used_render, (70, 150))
     TELA.blit(tela_03, (0, 0))
 
 
-# Rede
 def show_addrs_ip():
-    # Interface de rede terá que ser colocada manualmente, variação muito grande.
-    INTERFACE_REDE = "Wi-Fi"
-
     dic_interfaces = psutil.net_if_addrs()
-    ip_rede = dic_interfaces[INTERFACE_REDE][1].address
-    net_mask = dic_interfaces[INTERFACE_REDE][1].netmask
+    ip_rede = dic_interfaces["Wi-Fi"][1].address
+    net_mask = dic_interfaces["Wi-Fi"][1].netmask
     ip_local = "IPv4 Local: {}".format(ip_rede)
     ip_netmask = "Máscara de Sub-rede: {}".format(net_mask)
     ip_local_render = TITLE_FONT.render(ip_local, True, WINE)
@@ -192,7 +167,6 @@ def resumo():
     tela_05 = pygame.Surface(TAM_TELA)
     tela_05.fill(PASTEL)
 
-    # Título
     titulo = TITLE_FONT.render("Resumo", True, WINE)
     tela_05.blit(titulo, (40, 20))
 
@@ -218,9 +192,8 @@ def resumo():
     tela_05.blit(percentagem_uso, (40, 140))
 
     # address
-    INTERFACE_REDE = "Wi-Fi"
     dic_interfaces = psutil.net_if_addrs()
-    ip_rede = dic_interfaces[INTERFACE_REDE][1].address
+    ip_rede = dic_interfaces["Wi-Fi"][1].address
     ip_local = "IPv4 Local: {}".format(ip_rede)
     ip_local_render = PERCENT_FONT.render(ip_local, True, WINE)
     tela_05.blit(ip_local_render, (380, 140))
@@ -228,100 +201,71 @@ def resumo():
     TELA.blit(tela_05, (0, 0))
 
 
+def show_message(current_page):
+    message_surface = pygame.Surface(TAM_TELA)
+    message_surface.fill(PASTEL)
+    if not current_page == 4:
+        perc_texto = "Pressione espaço para ver o resumo ou seta para ir à direita ou esquerda"
+        percentagem_uso = PERCENT_FONT.render(perc_texto, True, AZUL_PISCINA)
+        message_surface.blit(percentagem_uso, (100, 10))
+    TELA.blit(message_surface, (0, 500))
+
+
 def verifica_discos():
-    # verifica a quantidade de discos
-    qtd_discos = len(psutil.disk_partitions())
-    discos = []
-    espaco_total = 0
-    espaco_usado = 0
-    espaco_livre = 0
+    partitions = psutil.disk_partitions()
+    qtd_discos = len(partitions)
+    disks = []
+    all_space = 0
+    used_space = 0
+    free_space = 0
 
-    # Faz a iteração sobre os retornos do disk_partitions e disk_usage.
-    for partition in psutil.disk_partitions():
-        discos.append(partition[1])
-        espaco_total += psutil.disk_usage(partition[1])[0]
-        espaco_usado += psutil.disk_usage(partition[1])[1]
-        espaco_livre += psutil.disk_usage(partition[1])[2]
+    for partition in partitions:
+        disks.append(partition[1])
+        all_space += psutil.disk_usage(partition[1])[0]
+        used_space += psutil.disk_usage(partition[1])[1]
+        free_space += psutil.disk_usage(partition[1])[2]
 
-    string_discos = ""
-    for i in range(len(discos)):
-        string_discos += discos[i]+" "
+    label_disks = ""
+    for i in range(len(disks)):
+        label_disks += disks[i]+" "
 
-    # Calcula a porcentagem do uso total.
-    percent_usado = round(espaco_usado / espaco_total * 100, 1)
-    return qtd_discos, string_discos, espaco_total, espaco_usado, espaco_livre, percent_usado
-
-
-def controle_setas():
-    tela_seta = pygame.Surface(TAM_TELA)
-    tela_seta.fill(PASTEL)
-    image = pygame.image.load(r'resources/seta-direita.png')
-    imagered = pygame.transform.smoothscale(image, (70, 70))
-    tela_seta.blit(imagered, (340, 10))
-    tela_seta.blit(pygame.transform.rotate(imagered, 180), (180, 10))
-    TELA.blit(tela_seta, (0, 500))
-
-
-def colisao_setas(mouse):
-    # Posições das setas esquerda e direita
-    # Posição no eixo x
-    if 510 <= mouse[1] <= 580:
-        if 180 <= mouse[0] <= 240:
-            return 1
-        if 350 <= mouse[0] <= 405:
-            return 2
-
-
-# Verifica o IP público que acessou a página do dyndns.
-def ip_publico():
-    data = str(urlopen('http://checkip.dyndns.com/').read())
-    return re.compile(r'Address: (\d+\.\d+\.\d+\.\d+)').search(data).group(1)
-
-
-# Variável inicializada vazia (IP_Externo)
-ip_net = ""
+    percent = round(used_space / all_space * 100, 1)
+    return qtd_discos, label_disks, all_space, used_space, free_space, percent
 
 
 def main():
-    controle = 60
-    pagina = 0
+    conta_clocks = 60
+    page = 0
     while True:
         for event in pygame.event.get():
-            if event.type == QUIT:
+            if event.type == pygame.QUIT:
                 pygame.quit()
-                sys.exit()
-
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                pos = pygame.mouse.get_pos()
-                if colisao_setas(pos) == 1:
-                    if pagina > 0:
-                        pagina -= 1
-                if colisao_setas(pos) == 2:
-                    if pagina < 4:
-                        pagina += 1
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    if pagina > 0:
-                        pagina -= 1
+                    if page > 0:
+                        page -= 1
                 if event.key == pygame.K_RIGHT:
-                    if pagina < 5:
-                        pagina += 1
-        if controle == 60:
-            controle_setas()
-            if pagina == 0:
+                    if page <= 2:
+                        page += 1
+                if event.key == pygame.K_SPACE:
+                    page = 4
+
+        if conta_clocks == 60:
+            if page == 0:
                 show_cpu()
-            if pagina == 1:
+            if page == 1:
                 show_use_memory()
-            if pagina == 2:
+            if page == 2:
                 show_use_disk()
-            if pagina == 3:
+            if page == 3:
                 show_addrs_ip()
-            if pagina == 4:
+            if page == 4:
                 resumo()
-            controle = 0
+            conta_clocks = 0
+        show_message(page)
         pygame.display.update()
-        controle += 1
-        CLOCK.tick(HZ)
+        conta_clocks += 1
+        CLOCK.tick(FPS)
 
 
 if __name__ == '__main__':
